@@ -24,7 +24,6 @@ export default defineApp(async (sdk) => {
   const settings = { version: APP_VERSION, defaultTimeoutSec: 120 };
 
   await registerTools(sdk, book, channel, settings, mirror);
-  mirror.start();
 
   // 状态卡读的这条 route：只读，不改任何东西
   try {
@@ -65,6 +64,9 @@ export default defineApp(async (sdk) => {
       book.defaultIdleMinutes = num(cfg.idleMinutes, 30, 1, 720);
       book.defaultMaxLifeMinutes = num(cfg.maxLifeMinutes, 240, 1, 1440);
       settings.defaultTimeoutSec = num(cfg.defaultTimeoutSec, 120, 5, 3600);
+
+      // 输入栏的贡献要等 apply 落定才登记，太早调用会被“没有声明这个 item”拒掉
+      mirror.start();
 
       // Hana 重启后租约还在：把心跳续上，别让后台窗口以为没人了
       const alive = channel.describe();

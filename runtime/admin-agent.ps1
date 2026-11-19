@@ -47,6 +47,32 @@ function Write-JsonFile {
     Move-Item -LiteralPath $tmp -Destination $Path -Force
 }
 
+# Heartbeat writer: fixed 4KB, overwrite in place.
+# tmp + rename would create/delete a file and touch the directory entry on every beat,
+# which NTFS journals as three metadata records. Overwriting the same cluster keeps the
+# file size constant, so an idle heartbeat costs one cluster and nothing else.
+function Write-StateFile {
+    param([string]$Path, $Object)
+    $json = ($Object | ConvertTo-Json -Depth 8 -Compress)
+    $bytes = $Utf8NoBom.GetBytes($json)
+    $size = 4096
+    if ($bytes.Length + 8 -gt $size) {
+        $size = [int]([math]::Ceiling(($bytes.Length + 8) / 4096.0) * 4096)
+    }
+    $buf = New-Object byte[] $size
+    for ($i = 0; $i -lt $size; $i++) { $buf[$i] = 0x20 }
+    [Array]::Copy($bytes, $buf, $bytes.Length)
+    $fs = [IO.File]::Open($Path, [IO.FileMode]::OpenOrCreate, [IO.FileAccess]::Write, [IO.FileShare]::ReadWrite)
+    try {
+        if ($fs.Length -ne $size) { $fs.SetLength($size) }
+        $fs.Position = 0
+        $fs.Write($buf, 0, $size)
+        $fs.Flush()
+    } finally {
+        $fs.Dispose()
+    }
+}
+
 function Read-JsonFile {
     param([string]$Path)
     $raw = [IO.File]::ReadAllText($Path, $Utf8NoBom)
@@ -204,7 +230,7 @@ $state = [ordered]@{
     processed   = 0
     exitReason  = $null
 }
-Write-JsonFile -Path $StatePath -Object $state
+Write-StateFile -Path $StatePath -Object $state
 Append-Audit @{ t = $startedAt; event = "start"; pid = $PID; elevated = $isAdmin; user = $me.Name }
 
 $exitReason = "unknown"
@@ -259,10 +285,10 @@ while ($true) {
         Append-Audit @{ t = $now; event = "error"; message = [string]$_.Exception.Message }
     }
 
-    if ((-not $handled) -and (($now - $lastBeat) -gt 2000)) {
+    if ((-not $handled) -and (($now - $lastBeat) -gt 15000)) {
         $state.lastBeatAt = $now
         $state.processed = $processed
-        Write-JsonFile -Path $StatePath -Object $state
+        Write-StateFile -Path $StatePath -Object $state
         $lastBeat = $now
     }
 
@@ -276,7 +302,7 @@ $state.alive = $false
 $state.exitedAt = $endedAt
 $state.exitReason = $exitReason
 $state.processed = $processed
-Write-JsonFile -Path $StatePath -Object $state
+Write-StateFile -Path $StatePath -Object $state
 Append-Audit @{ t = $endedAt; event = "exit"; reason = $exitReason; processed = $processed }
 
 try {
