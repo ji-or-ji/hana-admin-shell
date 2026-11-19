@@ -1,0 +1,78 @@
+{
+  "manifestVersion": 2,
+  "id": "admin-shell",
+  "name": "管理员通道",
+  "version": "0.1.0",
+  "entry": "index.js",
+  "icon": "assets/icon.svg",
+  "description": "按会话开一个带有效期的管理员窗口：需要提权的命令交给它跑，闲置自动收回。首次开通要在屏幕上点一次 UAC。",
+  "minAppVersion": "1.5.118-beta",
+  "capabilities": [
+    "app/tools.expose-to-model",
+    "app/input.status",
+    "app/process.spawn"
+  ],
+  "contributes": {
+    "ui": {
+      "inputStatus": [
+        {
+          "id": "admin",
+          "title": "管理员通道",
+          "text": "提权",
+          "tooltip": "本会话没有管理员窗口，点一下开一个（会弹一次 UAC）",
+          "toolName": "admin_toggle"
+        }
+      ],
+      "contextMenus": [
+        {
+          "id": "admin-close",
+          "title": "结束本会话的管理员窗口",
+          "surface": "hana/session.contextMenu",
+          "toolName": "admin_close"
+        }
+      ]
+    },
+    "cards": [
+      {
+        "id": "panel",
+        "title": "管理员通道",
+        "description": "哪个会话还握着管理员窗口、各自还剩多久、最近跑过什么命令。",
+        "route": "/panel.html",
+        "face": {
+          "image": "assets/cover.svg"
+        }
+      }
+    ],
+    "settings": {
+      "title": "管理员通道",
+      "schema": {
+        "properties": {
+          "idleMinutes": {
+            "type": "number",
+            "title": "闲置自动关闭（分钟）",
+            "description": "一条命令跑完就开始计时，到点没人用就自动收回管理员窗口",
+            "default": 30,
+            "minimum": 1,
+            "maximum": 720
+          },
+          "maxLifeMinutes": {
+            "type": "number",
+            "title": "单次开通最长寿命（分钟）",
+            "description": "从开通那一刻起算，续期不会延长它；到点无论有没有在用都收掉",
+            "default": 240,
+            "minimum": 1,
+            "maximum": 1440
+          },
+          "defaultTimeoutSec": {
+            "type": "number",
+            "title": "单条命令默认超时（秒）",
+            "description": "admin_exec 没写明超时时的默认值",
+            "default": 120,
+            "minimum": 5,
+            "maximum": 3600
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600" width="960" height="600">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#191b1f"/>
+      <stop offset="1" stop-color="#232830"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.62" cy="0.42" r="0.55">
+      <stop offset="0" stop-color="#7fc4ec" stop-opacity="0.26"/>
+      <stop offset="1" stop-color="#7fc4ec" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="960" height="600" fill="url(#bg)"/>
+  <rect width="960" height="600" fill="url(#glow)"/>
+  <g opacity="0.5" fill="#3a4250">
+    <circle cx="120" cy="120" r="3"/><circle cx="160" cy="120" r="3"/><circle cx="200" cy="120" r="3"/>
+    <circle cx="120" cy="160" r="3"/><circle cx="160" cy="160" r="3"/><circle cx="200" cy="160" r="3"/>
+    <circle cx="120" cy="200" r="3"/><circle cx="160" cy="200" r="3"/><circle cx="200" cy="200" r="3"/>
+  </g>
+  <g transform="translate(480 268)">
+    <path d="M0-132l108 40v90c0 63-45 106-108 128-63-22-108-65-108-128v-90z"
+          fill="none" stroke="#7fc4ec" stroke-width="18" stroke-linejoin="round" opacity="0.95"/>
+    <path d="M0 52V-42" fill="none" stroke="#eaf5fc" stroke-width="18" stroke-linecap="round"/>
+    <path d="M-38-6l38-38 38 38" fill="none" stroke="#eaf5fc" stroke-width="18"
+          stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <text x="480" y="500" text-anchor="middle" font-family="Segoe UI, sans-serif"
+        font-size="34" fill="#8d97a6" letter-spacing="10">ADMIN SHELL</text>
+</svg>
